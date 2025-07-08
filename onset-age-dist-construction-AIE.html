@@ -7516,7 +7516,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Simulating-Onset-Age-Distribution-of-anti-GABABR-Autoimmune-Encephalitis-from-Published-Summary-Statistics">Simulating Onset Age Distribution of anti-GABABR Autoimmune Encephalitis from Published Summary Statistics<a class="anchor-link" href="#Simulating-Onset-Age-Distribution-of-anti-GABABR-Autoimmune-Encephalitis-from-Published-Summary-Statistics">¶</a></h1><p>by David Zhao<br/>
+<h1 id="Reconstructing-Granular-Onset-Age-Distributions-from-Summary-Statistics:-A-Rare-Disease-Use-Case">Reconstructing Granular Onset Age Distributions from Summary Statistics: A Rare Disease Use Case<a class="anchor-link" href="#Reconstructing-Granular-Onset-Age-Distributions-from-Summary-Statistics:-A-Rare-Disease-Use-Case">¶</a></h1><p>by David Zhao<br/>
 Updated on July 2, 2025</p>
 </div>
 </div>
@@ -7539,14 +7539,18 @@ Updated on July 2, 2025</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>This Python notebook demonstrates the customized approach to reconstruct age-at-onset distributions from summary statistics, using real-world evidence from the rare disease autoimmune encephalitis (AIE). The use case aims to estimate age band specific incidence for the anti-GABABR encephalitis, based on quantiles values alone with restriction to individual patient data.</p>
-<p>The statistical workflow was developed through extensive literature review and aligns with the approach outlined in Dr. Rick Wicklin published <a href="https://blogs.sas.com/content/iml/2023/09/06/model-data-summary-stats.html?utm_source=chatgpt.com">blog</a>.</p>
-<p>Key takeaways:</p>
-<ul>
-<li>A robust method for estimating age band specific disease burden without access to individual patient data</li>
-<li>A step-by-step tutorial for reconstructing distributions from summary statistics</li>
-<li>Reusable code snippets requiring minimal adjustments for new use cases</li>
-</ul>
+<p>In rare disease research, we often face a frustrating gap: while age of onset is a critical input for epidemiological models, health economics, and clinical trial design, individual-level data are rarely available. Instead, published studies typically report only summary statistics—a mean here, a median and interquartile range there—leaving modelers with incomplete foundations for age-specific analysis.</p>
+<p>This limitation is more than a data inconvenience; it directly impacts the quality of disease burden estimation and market access models that guide resource allocation and patient care.</p>
+<p>To address this challenge, we developed a simulation-based framework that reconstructs full onset age distributions from minimal inputs. By fitting plausible parametric distributions to reported quantiles, we can simulate granular age-at-onset profiles—including age-band–specific incidence proportions with uncertainty intervals.</p>
+<p>This Python notebook demonstrates the approach using a real-world example: anti-GABABR encephalitis, a rare autoimmune encephalitis subtype. In this case, only quantile data were reported, and individual patient data were inaccessible. Yet through distribution modeling, we recreated actionable onset distributions for downstream use.</p>
+<p>Our method draws inspiration from a technique introduced by Dr. Rick Wicklin in his SAS blog <a href="https://blogs.sas.com/content/iml/2023/09/06/model-data-summary-stats.html?utm_source=chatgpt.com">post</a>, where he showed how to fit parametric models to summary statistics using quantile-matching optimization. We’ve adapted and extended it for use in Python and applied it specifically to the context of rare disease epidemiology.</p>
+<hr/>
+<p>What You’ll Learn:<br/>
+•	How to derive age-band–specific disease burden estimates from published quantile data<br/>
+•	A step-by-step modeling workflow tailored to rare diseases<br/>
+•	Reusable, lightweight code that can be customized for other indications</p>
+<hr/>
+<p>Whether you’re preparing an HTA submission or estimating global incidence for an underdiagnosed condition, this method offers a scalable, transparent solution when raw data aren’t an option—but robust modeling still is.</p>
 </div>
 </div>
 </div>
@@ -7557,12 +7561,30 @@ Updated on July 2, 2025</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Workflow-Overview">Workflow Overview<a class="anchor-link" href="#Workflow-Overview">¶</a></h2><ol>
-<li>Select and fit candidate distributions: Fit the clinically plausible distributions: log-normal, weibull, generalized gamma, and metalog</li>
-<li>Estimate parameters: Use quantile matching based on known median, q1, and q3 (simplified input scenario)</li>
-<li>Evaluate goodness-of-fit: Calculate the sum of squared differences between modelled and observed quantiles. And identify the best-fitting distribution</li>
-<li>Visual assessment: Plot modelled vs. empirical cdfs for the selected distribution</li>
-<li>Estimate uncertainty: Generate 95% confidence intervals for age-band proportions using bootstrap resampling</li>
+<h2 id="Workflow-Overview">Workflow Overview<a class="anchor-link" href="#Workflow-Overview">¶</a></h2><p>The workflow begins with choosing plausible parametric distributions, informed by both clinical understanding of the disease’s onset profile and statistical flexibility. In rare diseases like anti-GABABR encephalitis, where access to individual patient data is limited, this method provides a practical path to reconstruct granular onset age distributions from published summary statistics.</p>
+<p>Each step is designed to ensure the simulation is both transparent and robust for downstream applications such as disease burden estimation and HTA modeling:</p>
+<ol>
+<li><p>Define Modeling Rationale
+Select plausible distributions (e.g., log-normal, Weibull, generalized gamma) based on the expected shape and skewness of onset age.</p>
+</li>
+<li><p>Fit Candidate Distributions
+Use reported quantiles (e.g., median, Q1, Q3) to estimate distribution parameters using a quantile-matching optimization approach.</p>
+</li>
+<li><p>Assess Goodness-of-Fit
+Evaluate candidate fits by comparing model-derived vs. reported quantiles (e.g., sum of squared errors) and inspecting visual fit.</p>
+</li>
+<li><p>Simulate Onset Ages
+Generate synthetic patient-level onset ages from the best-fitting distribution.</p>
+</li>
+<li><p>Calculate Age-Band Proportions
+Aggregate simulated data into age bands (e.g., 0–12, 13–17, 18+), enabling downstream epidemiological and economic analysis.</p>
+</li>
+<li><p>Estimate Uncertainty via Bootstrap
+Use resampling to compute 95% confidence intervals for each age-band proportion.</p>
+</li>
+<li><p>Conduct Sensitivity Analysis
+Explore robustness of results by varying distribution parameters within plausible bounds and comparing output across scenarios.</p>
+</li>
 </ol>
 </div>
 </div>
@@ -7696,7 +7718,23 @@ Updated on July 2, 2025</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Fitting-Log-normal-distribution">Fitting Log-normal distribution<a class="anchor-link" href="#Fitting-Log-normal-distribution">¶</a></h3><p>Fit two parameters in log-normal distribution:</p>
+<h3 id="Fitting-Log-normal-distribution">Fitting Log-normal distribution<a class="anchor-link" href="#Fitting-Log-normal-distribution">¶</a></h3>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7e9249ae">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>The log-normal distribution assumes that the logarithm of onset age follows a normal distribution.</p>
+<ul>
+<li>Why it’s plausible: It naturally models right-skewed data, which is common in diseases that mostly affect adults but may have early-onset outliers.</li>
+<li>Use case: Often used in time-to-event models where values cannot be negative.</li>
+</ul>
+<p>Two parameters to fit in log-normal distribution:</p>
 <ul>
 <li>mu: log-scale mean</li>
 <li>sigma: log-scale SD</li>
@@ -7712,6 +7750,18 @@ Updated on July 2, 2025</p>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h4 id="Quantile-matching-with-optimization">Quantile matching with optimization<a class="anchor-link" href="#Quantile-matching-with-optimization">¶</a></h4>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a718c531">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>In this approach, we use a quantile-matching method: we fit candidate distributions (e.g., log-normal, gamma, Weibull) by optimizing their parameters such that their theoretical quantiles align with reported values (e.g., Q1 = 8, Median = 10, Q3 = 14). This requires constrained optimization to ensure valid parameter ranges (e.g., positive shape/scale).</p>
+<p>Below is an implementation of this method to fit a log-normal distribution.</p>
 </div>
 </div>
 </div>
@@ -7962,13 +8012,39 @@ Updated on July 2, 2025</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5ec5518c">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Left panel shows the log-normal distribution of age at onset for anti-GABABR AIE, with the y-axis indicating patient counts. Right panel displays the cumulative distribution function (CDF) of the log-normal distribution alongside the empirical quantiles.</p>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d14ac863">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Fitting-Weibull-distribution">Fitting Weibull distribution<a class="anchor-link" href="#Fitting-Weibull-distribution">¶</a></h2>
+<h3 id="Fitting-Weibull-distribution">Fitting Weibull distribution<a class="anchor-link" href="#Fitting-Weibull-distribution">¶</a></h3>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=6265b831">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>The Weibull distribution is a versatile survival model that can capture both increasing and decreasing hazard rates, depending on its shape parameter.</p>
+<ul>
+<li>Why it’s plausible: It provides flexibility in capturing skewness and hazard patterns, making it suitable for onset age modeling when early or late peaks are expected.</li>
+<li>Use case: Common in clinical and industrial reliability models.</li>
+</ul>
 </div>
 </div>
 </div>
@@ -7979,7 +8055,7 @@ Updated on July 2, 2025</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Fit 2-parameter Weibull distribution:</p>
+<p>Fit 2-parameter in Weibull distribution:</p>
 <ul>
 <li>c: Shape parameter</li>
 <li>λ: Scale parameter</li>
@@ -8177,13 +8253,39 @@ Updated on July 2, 2025</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=229ae807">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Left panel shows the Weibull distribution of age at onset for anti-GABABR AIE, with the y-axis indicating patient counts. Right panel displays the cumulative distribution function (CDF) of the Weibull distribution alongside the empirical quantiles.</p>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b6f81c93">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Fitting-Generalized-Gamma-distribution">Fitting Generalized Gamma distribution<a class="anchor-link" href="#Fitting-Generalized-Gamma-distribution">¶</a></h2>
+<h3 id="Fitting-Generalized-Gamma-distribution">Fitting Generalized Gamma distribution<a class="anchor-link" href="#Fitting-Generalized-Gamma-distribution">¶</a></h3>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9a072eef">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>The generalized gamma distribution is a three-parameter family that encompasses many other distributions (e.g., exponential, Weibull, log-normal) as special cases.</p>
+<ul>
+<li>Why it’s plausible: Its high flexibility makes it ideal for capturing heavy tails and non-standard skewness, especially when data are sparse or summary-based.</li>
+<li>Use case: Well-suited for modeling onset ages with substantial variation or heterogeneity.</li>
+</ul>
 </div>
 </div>
 </div>
@@ -8194,7 +8296,7 @@ Updated on July 2, 2025</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>The generalized Gamma distribution has three parameters to fit:</p>
+<p>Three parameters to fit in the generalized Gamma distribution:</p>
 <ul>
 <li>a: shape parameter</li>
 <li>c: power parameter</li>
@@ -8363,6 +8465,17 @@ Updated on July 2, 2025</p>
 </div>
 </div>
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5176e7fc">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Left panel shows the generalized Gamma distribution of age at onset for anti-GABABR AIE, with the y-axis indicating patient counts. Right panel displays the cumulative distribution function (CDF) of the generalized Gamma distribution alongside the empirical quantiles.</p>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=80462e06">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -8476,6 +8589,7 @@ Sum of squared differences for gengamma: 0.0772
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>In this case, the Generalized Gamma distribution shows the smallest squared difference, indicating the best fit among the three candidate distributions.</p>
+<p>Generalized gamma yields the smallest error, likely due to its flexibility in modeling both skew and kurtosis.</p>
 </div>
 </div>
 </div>
@@ -8497,7 +8611,8 @@ Sum of squared differences for gengamma: 0.0772
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>In this fictional example, the goal is to estimate the proportions of cases in three age subgroups: &lt;12 years, 12–17 years, and ≥18 years. Using the bootstrap technique, we calculate the average proportion for each subgroup along with corresponding 95% confidence intervals.</p>
+<p>In this example, we aim to estimate how disease onset cases are distributed across three age groups: under 12, 12–17, and 18 or older. To go beyond simple point estimates, we apply bootstrapping—a resampling technique—to calculate not only the average proportion in each group but also 95% confidence intervals.</p>
+<p>Why does this matter? Because decision-makers don’t just want the numbers—they want to know how certain we are. That’s exactly what bootstrapping reveals.</p>
 </div>
 </div>
 </div>
@@ -8676,6 +8791,28 @@ Sum of squared differences for gengamma: 0.0772
 <div class="jp-RenderedImage jp-OutputArea-output" tabindex="0">
 <img alt="No description has been provided for this image" class="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAxYAAAHqCAYAAACZcdjsAAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjkuMiwgaHR0cHM6Ly9tYXRwbG90bGliLm9yZy8hTgPZAAAACXBIWXMAAA9hAAAPYQGoP6dpAABlWklEQVR4nO3dd3gU5drH8d9uOiUJJUWSSAioAYGABDBINxqlKEepniMBEUVBpaqggKjIUUGxoByPUlQ4oBRBRRBpFlCkKiogEjqhSkJNfd4/eDOwZBOSDBAC3891Rdl7n5l97tmd2b1nnplxGGOMAAAAAMAGZ3F3AAAAAEDJR2EBAAAAwDYKCwAAAAC2UVgAAAAAsI3CAgAAAIBtFBYAAAAAbKOwAAAAAGAbhQUAAAAA2ygsAAAAANhGYQH8v23btsnhcGjSpEnF3ZXLTvPmzdW8efPi7sYFFRkZqW7duhW4bZs2bS5uh65wjz76qG677TaX2L59+9S+fXtVqFBBDodDY8eOLZ7Owa2lS5fK4XBo6dKlVqxbt26KjIy8pP1g24zLwdNPP62GDRsWdzcuexQWV5F33nlHDofjslgxHA6Hy1/p0qVVo0YNvfjiizpx4kRxdy9fOV+2OX9eXl6KiopS165dtXXr1uLuXpH9/vvveu6557Rt27bi7kqxuJj5Hzt2TH379lV4eLh8fHxUvXp1vfvuu7naTZo0Kde6kfOXnJxstTPGaMSIEQoLC1NwcLD69u2r9PT0XK8ZFhamqVOnFqqvqampGjFihGJiYlSmTBn5+fmpZs2aeuqpp7Rnzx6rXbdu3VSmTJkCzTMpKUnvv/++hgwZ4hLv16+fFixYoMGDB+ujjz7SHXfcUai+FofU1FSNHDlSsbGxCggIkI+PjypXrqxOnTrpyy+/LO7uQdL+/fv19NNPq1atWipTpox8fX1VrVo1de/eXd9//31xd69YuNu2BAcHq0WLFvrqq68u+uu/8847RS4M582bp+eee+6C9qco+vbtq/Xr12vu3LnF3ZXLmmdxdwCXzpQpUxQZGamVK1dqy5YtqlatWrH257bbblPXrl0lnf4R9N1332no0KFav369Pv3002LtW0E8/vjjql+/vjIyMrRmzRq99957+vLLL/Xrr7+qUqVKxd29Qvv99981YsQINW/ePNceya+//rp4OnURbdq0SU7nmX0r+eVvR1ZWlhISErRq1Sr17t1b1113nRYsWKBHH31Uf//9d64f25L0/PPPq0qVKi6xwMBA699TpkzRSy+9pKeeekqlS5fWyJEjFRISosGDB1ttRo4cqcjISN13330F7uvWrVsVHx+vHTt2qEOHDnrooYfk7e2tX375RR988IFmz56tzZs3F3oZvPHGG6pSpYpatGjhEl+8eLHuvvtuDRw4sNDzLA5btmxRQkKCtm/frn/84x/q2rWrypQpo507d2revHlq06aNPvzwQ91///3F3dWL5r///a+ys7OLuxt5WrlypVq3bq2jR4+qc+fO6tWrl3x8fJSUlKTPPvtMkyZN0rJly9S0adPi7mqxyNm2GGO0b98+TZo0Sa1atdLnn39+UY/KvvPOO6pYsWKBjxKfbd68eRo3blyxFxehoaG6++67NXr0aN11113F2pfLmsFVYevWrUaSmTVrlgkKCjLPPfdcsfZHkundu3euePv27Y3T6TQnT5685H1KSkoykszEiRPzbbdkyRIjyXz66acu8TfffNNIMi+99FKe0x47duxCdPWCOnnypMnKyjKffvqpkWSWLFlS3F0qFvnlX7lyZdO6desizfeTTz4xkswHH3zgEr/33nuNr6+v2bdvnxWbOHGikWR+/vnnfOfZqVMn0717d+vx8OHDzc0332w93rJli/Hz8zvvfM6WkZFhYmJiTKlSpcx3332X6/mUlBQzZMgQ63FiYqIpXbr0eeebnp5uKlasaJ599tlczzkcDrfbgXNdDutNRkaGqVmzpildurT5/vvv3bZZsGCBmTdv3iXuWcEVdjnmbOuKe5tQ0G3z4cOHzTXXXGNCQ0PNH3/8kev57OxsM3XqVLNy5cqL1NPLV17blsOHDxsvLy9z3333XdTXv/HGG02zZs2KNG3v3r1NQX+uZmRkmLS0tCK9TkHMmDHDOBwO89dff1201yjpGAp1lZgyZYrKlSun1q1bq3379poyZYrbdocOHdL9998vf39/BQYGKjExUevXr3c7vnXjxo1q3769ypcvL19fX8XGxto+RBgaGiqHwyFPzzMH07777jt16NBB1157rXx8fBQREaF+/frp5MmTLtPmDM3YvXu32rVrpzJlyigoKEgDBw5UVlaWS9sjR46oW7duCggIsPI8cuSIrb63bNlS0ulhH5L03HPPyeFw6Pfff9d9992ncuXKqXHjxpKkzMxMvfDCC6patap8fHwUGRmpIUOGKC0tzWWeOWP7v/76a9WpU0e+vr6qUaOGZs2alev1t27dqg4dOqh8+fIqVaqUbr755lxDM3KGcU2bNk3PPvuswsLCVKpUKb355pvq0KGDJKlFixbWofKcsdXuzrHYv3+/evTooZCQEPn6+iomJkaTJ092aZMzNnr06NF67733rHzr16+vn3/+2aVtcnKyunfvbg0Xuuaaa3T33XfnOzRp7ty5cjgc+uWXX6zYzJkz5XA4dM8997i0rV69ujp16uSybHP2nk2aNCnf/HN8//33atCggXx9fRUVFaUPP/wwz77l+O677yRJnTt3dol37txZp06d0pw5c9xOd/To0Vyf2xwnT55UuXLlrMfly5d3GUI4YMAAde7cWbGxseftX46ZM2dq/fr1euaZZ6zP6dn8/f01cuTIAs8vx/fff6+DBw8qPj7eiuUMyzDGaNy4cdbyPvu5ZcuW6dFHH1VwcLDCw8Otad955x3deOON8vHxUaVKldS7d+9c627z5s1Vs2ZN/fLLL2rWrJlKlSqlatWqacaMGZKkZcuWqWHDhvLz89MNN9ygb7755rx5fPrpp9qwYYOGDh2qW265xW2b22+/XXfeeadL7MiRI+rbt68iIiLk4+OjatWq6eWXX3bZ61+Y9UQq2LY3v+W4fft2Pfroo7rhhhvk5+enChUqqEOHDgUaBnjuORbNmzfPc/je2d8ZBVkOOe2Kum0eP3689u7dq7Fjxyo6OjrX8w6HQ126dFH9+vWtWEGXRc7y/P777/X4448rKChIgYGBevjhh5Wenq4jR46oa9euKleunMqVK6cnn3xSxhhr+rPf43HjxikqKkqlSpXS7bffrp07d8oYoxdeeEHh4eHy8/PT3XffrcOHD7v0Yc6cOWrdurUqVaokHx8fVa1aVS+88EKe24mCCAwMlJ+fn8t3riQdP35cAwYMsN6vG264QaNHj3bJSSrYd1lkZKR+++03LVu2zPps5HyfZGRkaMSIEbruuuvk6+urChUqqHHjxlq4cKGk05+3cePGSXIdQn3uMh07dqzVh99//13p6ekaNmyY6tWrp4CAAJUuXVpNmjTRkiVLXPp/9jxef/11Va5cWX5+fmrWrJk2bNiQa3nlbMfy2m6DoVBXjSlTpuiee+6Rt7e3unTponfffVc///yzywY2Oztbbdu21cqVK/XII48oOjpac+bMUWJiYq75/fbbb7rlllsUFhamp59+WqVLl9Ynn3yidu3aaebMmfrHP/5x3j6dOnVKBw8elHR6I/bDDz9o8uTJuu+++1w2cp9++qlOnDihRx55RBUqVNDKlSv11ltvadeuXbmGTOUMO2nYsKFGjx6tb775RmPGjFHVqlX1yCOPSDo9Pv3uu+/W999/r169eql69eqaPXu22zwL46+//pIkVahQwSXeoUMHXXfddXrppZesjfKDDz6oyZMnq3379howYIB++uknjRo1Sn/88Ydmz57tMv2ff/6pTp06qVevXkpMTNTEiRPVoUMHzZ8/3zoZdt++fWrUqJFOnDihxx9/XBUqVNDkyZN11113acaMGbnejxdeeEHe3t4aOHCg0tLSdPvtt+vxxx/Xm2++qSFDhqh69eqSZP3/XCdPnlTz5s21ZcsW9enTR1WqVNGnn36qbt266ciRI3riiSdc2k+dOlVHjx7Vww8/LIfDoVdeeUX33HOPtm7dKi8vL0nSvffeq99++02PPfaYIiMjtX//fi1cuFA7duzIc2hS48aN5XA49O2336p27dqSTv+QdzqdLmOpDxw4oI0bN6pPnz5u59O0adPz5r9lyxa1b99ePXr0UGJioiZMmKBu3bqpXr16uvHGG93OV5LS0tLk4eEhb29vl3ipUqUkSatXr1bPnj1dnmvRooWOHTsmb29vJSQkaMyYMbruuuus5+vXr6933nlHHTp0UOnSpfWf//xHjRo1kiQtXLhQixcvLvSQpZwfphd6GM/y5cvlcDhUt25dK9a0aVN99NFHuv/++12GRJ7t0UcfVVBQkIYNG6bjx49LOl2sjxgxQvHx8XrkkUe0adMma1v2ww8/WJ8lSfr777/Vpk0bde7cWR06dNC7776rzp07a8qUKerbt6969eql++67T6+++qrat2+vnTt3qmzZsnnm8fnnn0uS/vWvfxU49xMnTqhZs2bavXu3Hn74YV177bVavny5Bg8ebP0APltB1pPCbnvdLceff/5Zy5cvV+fOnRUeHq5t27bp3XffVfPmzfX7779bn82CeOaZZ/Tggw+6xD7++GMtWLBAwcHBhVoOdrfNn3/+ufz8/HLtVMhPYZfFY489ptDQUI0YMUI//vij3nvvPQUGBmr58uW69tpr9dJLL2nevHl69dVXVbNmzVyf7SlTpig9PV2PPfaYDh8+rFdeeUUdO3ZUy5YttXTpUj311FPasmWL3nrrLQ0cOFATJkywpp00aZLKlCmj/v37q0yZMlq8eLGGDRum1NRUvfrqqwXKNyUlRQcPHpQxRvv379dbb72lY8eOuXyujTG66667tGTJEvXo0UN16tTRggULNGjQIO3evVuvv/661bYg32Vjx47VY489pjJlyuiZZ56RJIWEhEg6vU6PGjVKDz74oBo0aKDU1FStWrVKa9as0W233aaHH35Ye/bs0cKFC/XRRx+5zWnixIk6deqUHnroIfn4+Kh8+fJKTU3V+++/ry5duqhnz546evSoPvjgAyUkJGjlypWqU6eOyzw+/PBDHT16VL1799apU6f0xhtvqGXLlvr111+tvkpSQECAqlatqh9++EH9+vUr0DK/6hTbsRJcMqtWrTKSzMKFC40xpw8Hh4eHmyeeeMKl3cyZM40kM3bsWCuWlZVlWrZsmesw9K233mpq1aplTp06ZcWys7NNo0aNzHXXXXfePkly+9euXTuXeRpjzIkTJ3JNP2rUKONwOMz27dutWGJiopFknn/+eZe2devWNfXq1bMef/bZZ0aSeeWVV6xYZmamadKkSaGGQk2YMMEcOHDA7Nmzx3z55ZcmMjLSOBwO61Dz8OHDjSTTpUsXl+nXrVtnJJkHH3zQJT5w4EAjySxevNiKVa5c2UgyM2fOtGIpKSnmmmuuMXXr1rViffv2NZJchrAcPXrUVKlSxURGRpqsrCyXvkdFReVarvkNBWrWrJnLYeyxY8caSebjjz+2Yunp6SYuLs6UKVPGpKamGmPODGGoUKGCOXz4sNV2zpw5RpL5/PPPjTHG/P3330aSefXVV90s8fzdeOONpmPHjtbjm266yXTo0MFIsoZDzJo1y0gy69evt9pVrlzZJCYmFij/nPfh22+/tWL79+83Pj4+ZsCAAfn2b8yYMbneG2OMefrpp40k06ZNGys2ffp0061bNzN58mQze/Zs8+yzz5pSpUqZihUrmh07dljtUlNTTePGja315sYbbzS7du0yGRkZpkaNGubf//53/gvNjbp165qAgIACty/oUKh//etfpkKFCm6fk5shkTlDNho3bmwyMzOt+P79+423t7e5/fbbrc+zMca8/fbb1vqYo1mzZkaSmTp1qhXbuHGjkWScTqf58ccfrfiCBQsKtN7XrVvXBAYG5oofO3bMHDhwwPpLSUmxnnvhhRdM6dKlzebNm12mefrpp42Hh4f1nhZ0PTGm4NvevJajMe63qStWrDCSzIcffmjF3A2FSkxMNJUrV85rMZkffvjBeHl5mQceeKDQy8HutrlcuXKmTp06ueKpqaku79HZQ8IKuixylmdCQoLJzs624nFxccbhcJhevXq59Dk8PNxlm5nzHgcFBZkjR45Y8cGDBxtJJiYmxmRkZFjxLl26GG9vb5f32V1fH374YVOqVKlc35vnyun/uX8+Pj5m0qRJLm1z3ocXX3zRJd6+fXvjcDjMli1bjDGF+y7LayhUTEzMeYeZ5jUUKmeZ+vv7m/3797s8l5mZmWtI1N9//21CQkJcPps58/Dz8zO7du2y4j/99JORZPr165frdW+//XZTvXr1fPt8NWMo1FVgypQpCgkJsU6cdDgc6tSpk6ZNm+ZyCHX+/Pny8vJy2XvqdDrVu3dvl/kdPnxYixcvVseOHXX06FEdPHhQBw8e1KFDh5SQkKA///xTu3fvPm+/7r77bi1cuFALFy7UnDlzNHjwYM2fP1/33Xefy+FWPz8/69/Hjx/XwYMH1ahRIxljtHbt2lzz7dWrl8vjJk2auFytad68efL09LSOYEiSh4eHHnvssfP2+WwPPPCAgoKCVKlSJbVu3VrHjx/X5MmTcw0/Obc/8+bNkyT179/fJT5gwABJyjV8qVKlSi57If39/dW1a1etXbvWulLQvHnz1KBBA5chLGXKlNFDDz2kbdu26ffff3eZZ2JiostyLax58+YpNDRUXbp0sWJeXl56/PHHdezYMS1btsylfadOnVyG7jRp0kSSrPfFz89P3t7eWrp0qf7+++9C9aVJkybWcKOjR49q/fr1euihh1SxYkUr/t133ykwMFA1a9YsfLL/r0aNGla/JSkoKEg33HDDea8Edt999ykgIEAPPPCAFi5cqG3btum9997TO++8I0kuQ/o6duyoiRMnqmvXrmrXrp1eeOEFLViwQIcOHXIZhlS2bFktW7ZMv/32m9atW6d169YpLCxM77zzjtLS0tSvXz/9/vvvatGihcLCwvSvf/1Lqamp+fYzNTU13z32RXXo0CGX976gevbsKQ8PD+vxN998o/T0dPXt29flpPuePXvK398/13pTpkwZl+FnN9xwgwIDA1W9enWXK+Pl/Pt872Nqaqrbq2A988wzCgoKsv7OPln+008/VZMmTVSuXDlrO5kzLCwrK0vffvuty7zOt54UZdt77nKUXLepGRkZOnTokKpVq6bAwECtWbMm3+WQn+TkZLVv31516tSxPt+FWQ52t815vUf333+/y3v01FNPWc8Vdln06NHDGoojnf78GGPUo0cPlz7Hxsa6/Ux16NBBAQEBLtNLp4+EnX2kvmHDhkpPT3d5P8/ua87736RJE504cUIbN27Me8GcZdy4cdb37scff6wWLVrowQcfdBleO2/ePHl4eOjxxx93mXbAgAEyxlhXkSrsd5k7gYGB+u233/Tnn38WqP/u3HvvvQoKCnKJnX2UODs7W4cPH1ZmZqZiY2Pdvq/t2rVTWFiY9bhBgwZq2LChlePZcj7HcI/C4gqXlZWladOmqUWLFkpKStKWLVu0ZcsWNWzYUPv27dOiRYusttu3b9c111yT69DvuVeP2rJli4wxGjp0qMvGOigoSMOHD5d0evx9VlaWkpOTXf7OviRmeHi44uPjFR8fr7vuuksvvfSSXnzxRc2aNUtffPGF1W7Hjh3q1q2bypcvb5030axZM0mnD+uezdfXN9cGply5ci4/VnPyPPcL6IYbbijwcpWkYcOGWcNOfvnlF+3Zs8ftMJJzr+6zfft2OZ3OXMs1NDRUgYGB2r59u0u8WrVqLl9kknT99ddLkjUOePv27W77nzOU59x5ntunwtq+fbuuu+46lx94+b3etdde6/I458dTzvvi4+Ojl19+WV999ZVCQkLUtGlTvfLKKy6XWM1LkyZNtHfvXm3ZssUadhMXF+dScHz33Xe65ZZbcvW3MM7NISeP8xVCoaGhmjt3rjXkrEqVKho0aJDeeustSTrvJVsbN26shg0b5joPwOl0qkaNGoqJiZGnp6cOHjyo5557TqNHj5bD4VCbNm1Uq1YtzZkzRzt27DjvjzN/f38dPXo03zZFZc4Zl10Q7tYbKfd66u3traioqFyfufDw8FzrTUBAgCIiInLFJJ33fSxbtqyOHTuWK/7oo49aP9TOHjIhnR7GOH/+/FzbyZxx2vv373dpf771pKDb3rO5W9dPnjypYcOGWePnK1asqKCgIB05ciTXNrWgMjMz1bFjR2VlZWnWrFny8fEp9HKwu23O6z16/vnnrffoXIVdFue+RzmfH3efK3efqcJML7l+Ln/77Tf94x//UEBAgPz9/RUUFGQNYSro+9agQQPre/ef//ynvvzyS9WoUUN9+vSxvp+3b9+uSpUq5drRcO72vbDfZe48//zzOnLkiK6//nrVqlVLgwYNcjlnriDy+j6bPHmyateubZ27ERQUpC+//NLtsjp7qGmO66+/3u15R8aYXNsWnME5Fle4xYsXa+/evZo2bZqmTZuW6/kpU6bo9ttvL9Q8c062GzhwoBISEty2qVatmnbu3JlrhV+yZEm+N1q79dZbJUnffvut2rZtq6ysLN122206fPiwnnrqKUVHR6t06dLavXu3unXrluvEv3P3zF1MtWrVcjkhNS95HRkozg2TnaMVRZHX+3L2D86+ffuqbdu2+uyzz7RgwQINHTpUo0aN0uLFi13G558r5yjNt99+q61bt+qmm26yTtR78803dezYMa1du7ZIJx4XNoe8NG3aVFu3btWvv/6q48ePKyYmxronRE6RmJ+IiAht2rQp3zZDhw7VTTfdpHbt2um7777T3r179corr8jX11cjRozQHXfcoYkTJ+ZZXEVHR2vt2rXauXNnrh85dlSoUKHQR6Ek+5/RvN6vor6P0dHRWrdunXbv3u2yZ/P666+33kNfX1+XabKzs3XbbbfpySefdDvPc9/78/WtoNves7lbjo899pgmTpyovn37Ki4uTgEBAXI4HOrcuXORLyU7aNAgrVixQt98843LyfY5/S7Mciiq6OhorV+/XhkZGS7n2+Scf+VOYZdFYT5X7j5TRf1cHjlyRM2aNZO/v7+ef/55Va1aVb6+vlqzZo2eeuqpIr9vTqdTLVq00BtvvKE///wz3/PF8mLnu6xp06b666+/NGfOHH399dd6//339frrr2v8+PG5zt3Ji7vP+Mcff6xu3bqpXbt2GjRokIKDg+Xh4aFRo0ZZ50MW1d9//62KFSvamseVjMLiCjdlyhQFBwdbV1U426xZszR79myNHz9efn5+qly5spYsWaITJ064HLXYsmWLy3RRUVGSTg99ye+HtZeXV649RDExMfn2NzMzU5KsvU6//vqrNm/erMmTJ7ucBOduz1NBVa5cWYsWLdKxY8dc9oyd74fbhVK5cmVlZ2frzz//dDk5eN++fTpy5IgqV67s0j5nL+XZG++cE3NzTmquXLmy2/7nHB4/d57uFObLoXLlyvrll1+UnZ3t8kO1MK/nTtWqVTVgwAANGDBAf/75p+rUqaMxY8bo448/znOaa6+9Vtdee62+++47bd261Ro+0rRpU/Xv31+ffvqpsrKyznvd+otd6Hl4eLicMJhzBKIgxenWrVtzHYk72/r16zVhwgStXr1akrRnzx6VK1fO+qFbqVIlpaen68CBA7n2qudo27at/ve//+njjz92uR+GXdHR0ZoyZYpSUlJchoAUVs5natOmTdY2SJLS09OVlJRUoOVoR5s2bTRt2jRNmTIlzx/I56pataqOHTt2wfpW0G3v+cyYMUOJiYkaM2aMFTt16lSRr4w3bdo0jR07VmPHjrWOJp+toMvB7ra5TZs2+vHHHzV79mx17NixQNNc6GVxsSxdulSHDh3SrFmzXLZlOVchtOPc793KlSvrm2++0dGjR12OWpy7fS/Md1l+29fy5cure/fu6t69u44dO6amTZvqueeeswqLomybZ8yYoaioKM2aNctl+pwje+dyNxRr8+bNbi8ckpSUdN7fMlczhkJdwU6ePKlZs2apTZs2at++fa6/Pn366OjRo9bVYBISEpSRkaH//ve/1jyys7NzFSXBwcFq3ry5/vOf/2jv3r25XvfAgQOSTu+9yznkmvN3vrHWOVdeyVlpc/binL3nxxijN954o7CLw9KqVStlZma63Pk4KyvLGppysbVq1UqScl0R5rXXXpMktW7d2iW+Z88elytFpaam6sMPP1SdOnUUGhpqzXPlypVasWKF1e748eN67733FBkZqRo1apy3X6VLl5akAn2htmrVSsnJyZo+fboVy8zM1FtvvaUyZcq4/XGRnxMnTujUqVMusapVq6ps2bK5LsHrTpMmTbR48WKtXLnSKizq1KmjsmXL6t///rf8/PxUr169fOdRmPztOnDggF5++WXVrl3b5cdWzrpztnnz5mn16tX53pX6iSee0IMPPmidQxISEqIDBw5Yl6v8448/5Onpme9etvbt26tWrVoaOXKky+cox9GjR60ruhRGXFycjDFW0VNU8fHx8vb21ptvvumyPfjggw+UkpKSa7250Dp27KgaNWrohRde0I8//ui2zbl7qDt27KgVK1ZowYIFudoeOXLE+kFXUAXd9p6Ph4dHrr6+9dZbRbps6YYNG/Tggw/qX//6V66rweUo6HKwu21+5JFHFBISon79+rm9KlpeRxAu1LK4mNx9F6anp7ucy1IUGRkZ+vrrr+Xt7W0VB61atVJWVpbefvttl7avv/66HA6HdUnlwnyXlS5d2u229dChQy6Py5Qpo2rVqrls94uybXa3vH766Se32zZJ+uyzz1zOZ1m5cqV++umnXJePTklJ0V9//WVdhQ+5ccTiCjZ37lwdPXo0zztE3nzzzQoKCtKUKVPUqVMntWvXTg0aNNCAAQO0ZcsWRUdHa+7cudaPk7Or/nHjxqlx48aqVauWevbsqaioKO3bt08rVqzQrl27tH79+vP2b/Pmzdae6BMnTujHH3/U5MmTVa1aNetchejoaFWtWlUDBw7U7t275e/vr5kzZxZpaEWOtm3b6pZbbtHTTz+tbdu2WfeFKOrY4sKKiYlRYmKi3nvvPevw9sqVKzV58mS1a9cu192Jr7/+evXo0UM///yzQkJCNGHCBO3bt08TJ0602jz99NP63//+pzvvvFOPP/64ypcvr8mTJyspKUkzZ84s0LkFderUkYeHh15++WWlpKTIx8dHLVu2tC4ZebaHHnpI//nPf9StWzetXr1akZGRmjFjhn744QeNHTu20CcBb968Wbfeeqv1483T01OzZ8/Wvn37ct3/wZ0mTZpoypQpcjgc1tAoDw8PNWrUSAsWLFDz5s1zXe7VTv6F1axZM8XFxalatWpKTk7We++9p2PHjumLL75weW8aNWqkunXrKjY2VgEBAVqzZo0mTJigiIgIt3folk6fGPvLL79o5syZViwuLk4hISHq0KGD7rnnHo0ePVr33HNPvkMFvby8NGvWLMXHx6tp06bq2LGjbrnlFnl5eem3337T1KlTVa5cuUIPKWvcuLEqVKigb775xrrXS1EEBQVp8ODB1rCuu+66S5s2bdI777yj+vXrF+oysEXh5eWl2bNnKyEhQY0bN9Y999yjJk2aWEMz586dqx07drj8mBo0aJDmzp2rNm3aWJcmPn78uH799VfNmDFD27ZtK/SQigux7W3Tpo0++ugjBQQEqEaNGtYQpnMvlV0Q3bt3l3T6COG5RxYbNWqkqKioAi8Hu9vm8uXLa/bs2Wrbtq1iYmLUuXNn1a9fX15eXtq5c6d1efKzz3O4kMviYmrUqJHKlSunxMREPf7443I4HProo48Kff7SV199ZR152L9/v6ZOnao///xTTz/9tPz9/SWd/o5s0aKFnnnmGW3btk0xMTH6+uuvNWfOHPXt21dVq1aVVLjvsnr16undd9/Viy++qGrVqik4OFgtW7ZUjRo11Lx5c9WrV0/ly5fXqlWrNGPGDJdLg+fsFHr88ceVkJAgDw+P834vtGnTRrNmzdI//vEPtW7dWklJSRo/frxq1Kjh9jycatWqqXHjxnrkkUeUlpamsWPHqkKFCrmOTn7zzTfWZZGRh0t09SkUg7Zt2xpfX19z/PjxPNt069bNeHl5mYMHDxpjjDlw4IC57777TNmyZU1AQIDp1q2b+eGHH4wkM23aNJdp//rrL9O1a1cTGhpqvLy8TFhYmGnTpo2ZMWPGefumcy555+HhYcLDw81DDz3kcidiY4z5/fffTXx8vClTpoypWLGi6dmzp1m/fn2uyw/mdfnLnMu+nu3QoUPm/vvvN/7+/iYgIMDcf//9Zu3atYW63Oy5d97O63UPHDiQ67mMjAwzYsQIU6VKFePl5WUiIiLM4MGDc10yMOeOzwsWLDC1a9c2Pj4+Jjo62u1r//XXX6Z9+/YmMDDQ+Pr6mgYNGpgvvviiUH3/73//a6KiooyHh4fLZSbPvdysMcbs27fPdO/e3VSsWNF4e3ubWrVq5Vp2OZfyc3cZWUlm+PDhxhhjDh48aHr37m2io6NN6dKlTUBAgGnYsKH55JNP3PbzXL/99puRlOsSgC+++KKRZIYOHZprmnMvN5tf/nndedvdcnGnX79+Jioqyvj4+JigoCBz3333ub1z6zPPPGPq1KljAgICjJeXl7n22mvNI488YpKTk93O98SJE6Zy5crmzTffzPXczz//bG666SZTtmxZ07Zt21yXY8zL33//bYYNG2Zq1aplSpUqZXx9fU3NmjXN4MGDzd69e612Bb3crDHGPP7446ZatWq54srncrN53TX87bffNtHR0cbLy8uEhISYRx55xPz9998ubZo1a2ZuvPHGXNPm9T6660dejhw5Yp5//nlTt25dU6ZMGePt7W0iIiJM+/btXS4Lm+Po0aNm8ODBplq1asbb29tUrFjRNGrUyIwePdqkp6cbYwq+nuQoyLY3v+X4999/W+tumTJlTEJCgtm4cWOudaIgl5vNuRSzu7+ztwcFWQ7G2Ns259i7d68ZNGiQqVGjhvHz8zM+Pj4mKirKdO3a1eWS0YVZFnktz7y28+euH3m9x3ltk9293g8//GBuvvlm4+fnZypVqmSefPJJ63LJ57s7urvLzfr6+po6deqYd9991+USusacfr/69etnKlWqZLy8vMx1111nXn311VztCvpdlpycbFq3bm3Kli1rJFnbzRdffNE0aNDABAYGGj8/PxMdHW1Gjhzp8pnIzMw0jz32mAkKCjIOh8P6Ps9vvcnOzjYvvfSSqVy5svHx8TF169Y1X3zxRa7P79nzGDNmjImIiDA+Pj6mSZMmLpcnz9GpUyfTuHHjfJf11c5hTBEu14GrymeffaZ//OMf+v777/O84ywujsjISNWsWdPlKllASbN161ZFR0frq6++si7QAADFbdu2bapSpYpeffVVDRw4MN+2ycnJqlKliqZNm8YRi3xwjgVcnH1NfenM+FZ/f3/ddNNNxdQrACVZVFSUevTooX//+9/F3RUAKJKxY8eqVq1aFBXnwTkWcPHYY4/p5MmTiouLU1pammbNmqXly5frpZdeuuSXKAVw5Tj7hFwAKGnYMVIwFBZw0bJlS40ZM0ZffPGFTp06pWrVqumtt95yOZEKAAAAOBfnWAAAAACwjXMsAAAAANhGYQEAAADAtqvuHIvs7Gzt2bNHZcuWLdJt4gEAAICrhTFGR48eVaVKlc57w92rrrDYs2ePIiIiirsbAAAAQImxc+dOhYeH59vmqissypYtK+n0wsm5fT0AAEBJ98MPP+jNN9/UunXrlJycrClTpqhNmzbW88YYvfTSS5o8ebJSUlLUsGFDvf7666patarV5vDhw3ryySc1f/58OZ1OtW3bVi+//LLKlCmT5+ueOnVKzzzzjGbOnKn09HS1bNlSr732moKDg615PvLII/ruu+8UFRWlcePGKSYmxpp+wIABioyM1GOPPXYRlgrsSk1NVUREhPUbOj9XXWGRM/zJ39+fwgIAAFxR6tWrp4ceekj33HOPSpUq5fJb5+WXX9Z//vMfTZ48WVWqVNHQoUN177336vfff5evr68kqVOnTtq7d68WLlyojIwMde/eXQMHDtTUqVPzfM2nnnpKCxYs0IwZMxQQEKA+ffooMTFRP/zwgyRpxIgROnnypNasWaN3331X/fr106pVqyRJP/74o9auXavx48fLw8PjIi4Z2FWQUwiuusvNpqamKiAgQCkpKRQWAADgiuRwODR79my1a9dO0umjFZUqVdKAAQM0cOBASVJKSopCQkI0adIkde7cWX/88Ydq1Kihn3/+WbGxsZKk+fPnq1WrVtq1a5cqVaqU63VSUlIUFBSkqVOnqn379pKkjRs3qnr16lqxYoVuvvlmtWrVSnfddZd69eqlP/74Q7GxsTp+/LgyMjJUv359vf/++9br4fJTmN/OXBUKAADgCpeUlKTk5GTFx8dbsYCAADVs2FArVqyQJK1YsUKBgYEuP/Lj4+PldDr1008/uZ3v6tWrlZGR4TLf6OhoXXvttdZ8Y2JitHjxYmVmZmrBggWqXbu2JOmVV15R8+bNKSquIBQWAAAAV7jk5GRJUkhIiEs8JCTEei45Odk6LyKHp6enypcvb7VxN19vb28FBgbmOd+nn35anp6eqlq1qmbPnq0PPvhAf/75pyZPnqyhQ4eqV69eioqKUseOHZWSknIh0kUxobAAAADARRMQEKCpU6dq+/btWrZsmWrUqKGHH35Yr776qqZMmaKtW7dq06ZNKlWqlJ5//vni7i5soLAAAAC4woWGhkqS9u3b5xLft2+f9VxoaKj279/v8nxmZqYOHz5stXE33/T0dB05ciTP+Z5r4sSJCgwM1N13362lS5eqXbt28vLyUocOHbR06dIiZIfLBYUFAADAFa5KlSoKDQ3VokWLrFhqaqp++uknxcXFSZLi4uJ05MgRrV692mqzePFiZWdnq2HDhm7nW69ePXl5ebnMd9OmTdqxY4c137MdOHBAzz//vN566y1JUlZWljIyMiRJGRkZysrKsp8sig2FBQAAwBXg2LFjWrdundatWyfp9Anb69at044dO+RwONS3b1+9+OKLmjt3rn799Vd17dpVlSpVsq4cVb16dd1xxx3q2bOnVq5cqR9++EF9+vRR586drStC7d69W9HR0Vq5cqWk08OcevToof79+2vJkiVavXq1unfvrri4ON188825+ti3b18NGDBAYWFhkqRbbrlFH330kf744w+99957uuWWWy7+gsJFc9XdxwIAAOBKtGrVKrVo0cJ63L9/f0lSYmKiJk2apCeffFLHjx/XQw89pCNHjqhx48aaP3++dQ8LSZoyZYr69OmjW2+9VU6nU/fee6/efPNN6/mMjAxt2rRJJ06csGKvv/661TYtLU0JCQl65513cvVvwYIF2rJliz766CMr1qdPH61atUoNGzZUgwYNNHz48Au6THBpcR8LAAAAAG5xHwsAAAAAlxSFBQAAAADbKCwAAAAA2EZhAQAAAMC2Yi0svv32W7Vt21aVKlWSw+HQZ599dt5pli5dqptuukk+Pj6qVq2aJk2adNH7CQAAACB/xVpYHD9+XDExMRo3blyB2iclJal169Zq0aKF1q1bp759++rBBx/UggULLnJPAQAAAOSnWO9jceedd+rOO+8scPvx48erSpUqGjNmjKTTN3L5/vvv9frrryshIeFidRMAAADAeZSocyxWrFih+Ph4l1hCQoJWrFhRTD0CAAAAIJWwO28nJycrJCTEJRYSEqLU1FSdPHlSfn5+uaZJS0tTWlqa9Tg1NVWSlJmZqczMTEmS0+mU0+lUdna2srOzrbY58aysLJ19H8G84h4eHnI4HNZ8z45LUlZWVoHinp6eMsa4xB0Ohzw8PHL1Ma84OZETOZETOZHTlZ7Tzp07tX//fpc+OhwOSdK59//NK+50OmWMcYk7HA45HI5ii5+9XC51Tps3b9bWrVtVVFFRUbr++usvq5wuVvxS5VSxYkVFREQU2zaiMPfSLlGFRVGMGjVKI0aMyBVfu3atSpcuLUkKCgpS1apVlZSUpAMHDlhtwsPDFR4ers2bNyslJcWKR0VFKTg4WBs2bNDJkyeteHR0tAIDA7V27VqXjW7t2rXl7e2tVatWufQhNjZW6enp+uWXX6yYh4eH6tevr5SUFG3cuNGK+/n5KSYmRgcPHnRZ4QMCAlS9enXt2bNHu3btsuLkRE7kRE7kRE5Xck6BgYGqV6+eevfuLW9vbyv+n//8R6mpqRo0aJBLTq+++qr8/f318MMPW7H09HS9+uqrioqKUpcuXaz4wYMH9Z///Ed16tRR69atrfjWrVv1v//9T02bNlWTJk2s+Lp16/Tll1+qdevWqlOnjhX/7rvv9O2336pLly6Kioqy4l9++aXWrVunhx9+WBUrVrTi//vf/7R161YNGjSo2HL66KOPtGPHDhXVNddcowceeOCyyilHSX2fPDw81KpVKzVs2LBYthHn7mDIj8MUpgy5iBwOh2bPnq127drl2aZp06a66aabNHbsWCs2ceJE9e3b12Whnc3dEYuIiAgdOnTIui05e4TIiZzIiZzIiZxKVk7r169XbGys+o0ep7AqZ34M5rRwyFXecYf136LGjTVn93GHXH9qFS1+aXLanfSX9u3c4dKD3Dnl3ZfQiGsVVqXqZZXTuX0pSe/T7qStGjekn5YvX6569eoVyzYiNTVVgYGBSklJsX4756VEHbGIi4vTvHnzXGILFy5UXFxcntP4+PjIx8cnV9zT01Oenq7p5yzsc+VsYAsaP3e+RYk7HA638bz6WNg4OZFTXnFyIieJnPLqY2Hj5HTxcsoZXlKpSlVVubG222lQeFVujCnuLuAsRg6lp6dbn/fi2EbkvHZBFOvJ28eOHdO6deu0bt06SacvJ7tu3TrrENzgwYPVtWtXq32vXr20detWPfnkk9q4caPeeecdffLJJ+rXr19xdB8AAADA/yvWwmLVqlWqW7eu6tatK0nq37+/6tatq2HDhkmS9u7d6zLOr0qVKvryyy+1cOFCxcTEaMyYMXr//fe51CwAAABQzIp1KFTz5s3zPdPc3V21mzdvrrVr117EXgEAAAAorBJ1HwsAAAAAlycKCwAAAAC2UVgAAAAAsI3CAgAAAIBtFBYAAAAAbKOwAAAAAGAbhQUAAAAA2ygsAAAAANhGYQEAAADANgoLAAAAALZRWAAAAACwjcICAAAAgG0UFgAAAABso7AAAAAAYBuFBQAAAADbKCwAAAAA2EZhAQAAAMA2CgsAAAAAtlFYAAAAALCNwgIAAACAbRQWAAAAAGyjsAAAAABgG4UFAAAAANsoLAAAAADYRmEBAAAAwDYKCwAAAAC2UVgAAAAAsI3CAgAAAIBtFBYAAAAAbKOwAAAAAGAbhQUAAAAA2ygsAAAAANhGYQEAAADANgoLAAAAALZRWAAAAACwjcICAAAAgG0UFgAAAABso7AAAAAAYBuFBQAAAADbKCwAAAAA2EZhAQAAAMA2CgsAAAAAtlFYAAAAALCNwgIAAACAbRQWAAAAAGyjsAAAAABgG4UFAAAAANsoLAAAAADYRmEBAAAAwDYKCwAAAAC2UVgAAAAAsI3CAgAAAIBtFBYAAAAAbKOwAAAAAGAbhQUAAAAA2ygsAAAAANhGYQEAAADANgoLAAAAALZRWAAAAACwjcICAAAAgG0UFgAAAABso7AAAAAAYBuFBQAAAADbKCwAAAAA2EZhAQAAAMA2CgsAAAAAtlFYAAAAALCNwgIAAACAbRQWAAAAAGyjsAAAAABgW7EXFuPGjVNkZKR8fX3VsGFDrVy5Mt/2Y8eO1Q033CA/Pz9FRESoX79+OnXq1CXqLQAAAAB3irWwmD59uvr376/hw4drzZo1iomJUUJCgvbv3++2/dSpU/X0009r+PDh+uOPP/TBBx9o+vTpGjJkyCXuOQAAAICzFWth8dprr6lnz57q3r27atSoofHjx6tUqVKaMGGC2/bLly/XLbfcovvuu0+RkZG6/fbb1aVLl/Me5QAAAABwcXkW1wunp6dr9erVGjx4sBVzOp2Kj4/XihUr3E7TqFEjffzxx1q5cqUaNGigrVu3at68ebr//vvzfJ20tDSlpaVZj1NTUyVJmZmZyszMtF7X6XQqOztb2dnZLv1xOp3KysqSMea8cQ8PDzkcDmu+Z8clKSsrq0BxT09PGWNc4g6HQx4eHrn6mFecnMiJnMiJnMjpSs4p598OGSn7rH46/n+fqTkz73zjTg/JmHPiDsnpzCeeffq5M8menn9e8exsSWfHnaefyzPuutzJ6erNySEjb29v6/NeHNuIs9udT7EVFgcPHlRWVpZCQkJc4iEhIdq4caPbae677z4dPHhQjRs3ljFGmZmZ6tWrV75DoUaNGqURI0bkiq9du1alS5eWJAUFBalq1apKSkrSgQMHrDbh4eEKDw/X5s2blZKSYsWjoqIUHBysDRs26OTJk1Y8OjpagYGBWrt2rctGt3bt2vL29taqVatc+hAbG6v09HT98ssvVszDw0P169dXSkqKy3Lw8/NTTEyMDh48qK1bt1rxgIAAVa9eXXv27NGuXbusODmREzmREzmR05WcU44QR4acu/+yHmeHVpY8PF1ikpQdVlXKypQzebsVM06nTFg1Ke2EnAd2n4l7ecuERkonUuU8vO9M3LeUTFC4HKmH5Ug9fCZe2l+mfKgcf++X43jqmbh/eZmAinIc2iPHqRNn+lI+RCodIMf+HXJkpJ+JB4VJvqXl2Jskx1k/Esnp6s0p1JmhQYMGWTvGi2Mbce4Ohvw4TGHKkAtoz549CgsL0/LlyxUXF2fFn3zySS1btkw//fRTrmmWLl2qzp0768UXX1TDhg21ZcsWPfHEE+rZs6eGDh3q9nXcHbGIiIjQoUOH5O/vL4k9QuRETuRETuRETiUtp/Xr1ys2NlajZ36lKtVrnukke8LJ6QrKKemPDRrS5W4tX75c9erVK5ZtRGpqqgIDA5WSkmL9ds5LsR2xqFixojw8PLRv3z6X+L59+xQaGup2mqFDh+r+++/Xgw8+KEmqVauWjh8/roceekjPPPOMnM7cp4z4+PjIx8cnV9zT01Oenq7p5yzsc+VsYAsaP3e+RYk7HA638bz6WNg4OZFTXnFyIieJnPLqY2Hj5HTxcnI4HJIkI8fpH2i5Oup+Pm7jDkch407J4W7eecTd5Jl/vBB9zytOTldETkYOpaenW5/34thG5Lx2QRTbydve3t6qV6+eFi1aZMWys7O1aNEilyMYZztx4kSuhZazYIrpwAsAAAAAFeMRC0nq37+/EhMTFRsbqwYNGmjs2LE6fvy4unfvLknq2rWrwsLCNGrUKElS27Zt9dprr6lu3brWUKihQ4eqbdu2eVZeAAAAAC6+Yi0sOnXqpAMHDmjYsGFKTk5WnTp1NH/+fOuE7h07drgcoXj22WflcDj07LPPavfu3QoKClLbtm01cuTI4koBAAAAgIq5sJCkPn36qE+fPm6fW7p0qctjT09PDR8+XMOHD78EPQMAAABQUMV6gzwAAAAAVwYKCwAAAAC2UVgAAAAAsI3CAgAAAIBtFBYAAAAAbKOwAAAAAGAbhQUAAAAA2ygsAAAAANhGYQEAAADANgoLAAAAALZRWAAAAACwjcICAAAAgG0UFgAAAABso7AAAAAAYBuFBQAAAADbKCwAAAAA2EZhAQAAAMA2CgsAAAAAtlFYAAAAALCNwgIAAACAbRQWAAAAAGyjsAAAAABgG4UFAAAAANsoLAAAAADYRmEBAAAAwDYKCwAAAAC2UVgAAAAAsI3CAgAAAIBtFBYAAAAAbKOwAAAAAGAbhQUAAAAA2ygsAAAAANhGYQEAAADANgoLAAAAALZRWAAAAACwjcICAAAAgG0UFgAAAABso7AAAAAAYBuFBQAAAADbKCwAAAAA2EZhAQAAAMA2CgsAAAAAtlFYAAAAALCNwgIAAACAbRQWAAAAAGyjsAAAAABgG4UFAAAAANsoLAAAAADYRmEBAAAAwDYKCwAAAAC2UVgAAAAAsI3CAgAAAIBtFBYAAAAAbKOwAAAAAGAbhQUAAAAA2ygsAAAAANhGYQEAAADANgoLAAAAALZRWAAAAACwjcICAAAAgG0UFgAAAABso7AAAAAAYBuFBQAAAADbKCwAAAAA2EZhAQAAAMA2CgsAAAAAtlFYAAAAALCNwgIAAACAbRQWAAAAAGyjsAAAAABgW7EXFuPGjVNkZKR8fX3VsGFDrVy5Mt/2R44cUe/evXXNNdfIx8dH119/vebNm3eJegsAAADAHc/ifPHp06erf//+Gj9+vBo2bKixY8cqISFBmzZtUnBwcK726enpuu222xQcHKwZM2YoLCxM27dvV2Bg4KXvPAAAAABLkQqLrKwsTZo0SYsWLdL+/fuVnZ3t8vzixYsLNJ/XXntNPXv2VPfu3SVJ48eP15dffqkJEybo6aefztV+woQJOnz4sJYvXy4vLy9JUmRkZFFSAAAAAHABFamweOKJJzRp0iS1bt1aNWvWlMPhKPQ80tPTtXr1ag0ePNiKOZ1OxcfHa8WKFW6nmTt3ruLi4tS7d2/NmTNHQUFBuu+++/TUU0/Jw8PD7TRpaWlKS0uzHqempkqSMjMzlZmZab2u0+lUdna2S5GUE8/KypIx5rxxDw8PORwOa75nx6XTBVlB4p6enjLGuMQdDoc8PDxy9TGvODmREzmREzmR05WcU86/HTJS9ln9dPz/KG/jutMzz7jTQzLmnLhDcjrziWeffu5Msqfnn1c8O1vS2XHn6efyjLsud3K6enNyyMjb29v6vBfHNuLsdudTpMJi2rRp+uSTT9SqVauiTC5JOnjwoLKyshQSEuISDwkJ0caNG91Os3XrVi1evFj//Oc/NW/ePG3ZskWPPvqoMjIyNHz4cLfTjBo1SiNGjMgVX7t2rUqXLi1JCgoKUtWqVZWUlKQDBw5YbcLDwxUeHq7NmzcrJSXFikdFRSk4OFgbNmzQyZMnrXh0dLQCAwO1du1al41u7dq15e3trVWrVrn0ITY2Vunp6frll1+smIeHh+rXr6+UlBSX5eDn56eYmBgdPHhQW7duteIBAQGqXr269uzZo127dllxciInciInciKnKzmnHCGODDl3/2U9zg6tLHl4usQkKTusqpSVKWfyditmnE6ZsGpS2gk5D+w+E/fylgmNlE6kynl435m4bymZoHA5Ug/LkXr4TLy0v0z5UDn+3i/H8dQzcf/yMgEV5Ti0R45TJ870pXyIVDpAjv075MhIPxMPCpN8S8uxN0mOs34kktPVm1OoM0ODBg2ydowXxzbi3B0M+XGYwpQh/69SpUpaunSprr/++sJOatmzZ4/CwsK0fPlyxcXFWfEnn3xSy5Yt008//ZRrmuuvv16nTp1SUlKStTfltdde06uvvqq9e/e6fR13RywiIiJ06NAh+fv7S2KPEDmREzmREzmRU0nLaf369YqNjdXomV+pSvWaZzrJnnByuoJySvpjg4Z0uVvLly9XvXr1imUbkZqaqsDAQKWkpFi/nfNSpCMWAwYM0BtvvKG33367SMOgJKlixYry8PDQvn37XOL79u1TaGio22muueYaeXl5uQx7ql69upKTk5Weni5vb+9c0/j4+MjHxydX3NPTU56erunnLOxz5TXMKq/4ufMtStzhcLiN59XHwsbJiZzyipMTOUnklFcfCxsnp4uXU87vDyPH6R9ouTrqfj5u4w5HIeNOyd3Pn7zibvLMP16IvucVJ6crIicjh9LT063Pe3FsIwrzW79IhcX333+vJUuW6KuvvtKNN95onUidY9asWeedh7e3t+rVq6dFixapXbt2kk6PG1u0aJH69OnjdppbbrlFU6dOVXZ2trXwNm/erGuuucZtUQEAAADg0ihSYREYGKh//OMftl+8f//+SkxMVGxsrBo0aKCxY8fq+PHj1lWiunbtqrCwMI0aNUqS9Mgjj+jtt9/WE088occee0x//vmnXnrpJT3++OO2+wIAAACg6IpUWEycOPGCvHinTp104MABDRs2TMnJyapTp47mz59vndC9Y8cOl8M6ERERWrBggfr166fatWsrLCxMTzzxhJ566qkL0h8AAAAARWPrBnkHDhzQpk2bJEk33HCDgoKCCj2PPn365Dn0aenSpblicXFx+vHHHwv9OgAAAAAunjzORsnf8ePH9cADD+iaa65R06ZN1bRpU1WqVEk9evTQiRMnzj8DAAAAAFeUIhUW/fv317Jly/T555/ryJEjOnLkiObMmaNly5ZpwIABF7qPAAAAAC5zRRoKNXPmTM2YMUPNmze3Yq1atZKfn586duyod99990L1DwAAAEAJUKQjFidOnMh1x2xJCg4OZigUAAAAcBUqUmERFxen4cOH69SpU1bs5MmTGjFihMtdtAEAAABcHYo0FOqNN95QQkKCwsPDFRMTI0lav369fH19tWDBggvaQQAAAACXvyIVFjVr1tSff/6pKVOmaOPGjZKkLl266J///Kf8/PwuaAcBAAAAXP6KfB+LUqVKqWfPnheyLwAAAABKqAIXFnPnztWdd94pLy8vzZ07N9+2d911l+2OAQAAACg5ClxYtGvXTsnJyQoODla7du3ybOdwOJSV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sSLP6Z5//nkFBwerR48el6KbAAAAAM7Dszhf/ODBg8rKylJISIhLPCQkRBs3bnQ7zffff68PPvhA69atK9BrpKWlKS0tzXqcmpoqScrMzFRmZqak08WM0+lUdna2srOzrbY58aysLBljzhv38PCQw+Gw5nt2XDp9pKUgcU9PTxljXOIOh0MeHh65+phXnJzIiZzIiZzI6UrOKeffDhkp+6x+Ov5/n6k5M+98404PyZhz4g7J6cwnnn36uTPJnp5/XvHsbElnx52nn8sz7rrcyenqzckhI29vb+vzXhzbiLPbnU+xFhaFdfToUd1///3673//q4oVKxZomlGjRmnEiBG54mvXrlXp0qUlSUFBQapataqSkpJ04MABq014eLjCw8O1efNmpaSkWPGoqCgFBwdrw4YNOnnypBWPjo5WYGCg1q5d67LRrV27try9vbVq1SqXPsTGxio9PV2//PKLFfPw8FD9+vWVkpLiUlz5+fkpJiZGBw8e1NatW614QECAqlevrj179mjXrl1WnJzIiZzIiZzI6UrOKUeII0PO3X9Zj7NDK0seni4xScoOqyplZcqZvN2KGadTJqyalHZCzgO7z8S9vGVCI6UTqXIe3ncm7ltKJihcjtTDcqQePhMv7S9TPlSOv/fLcTz1TNy/vExARTkO7ZHj1IkzfSkfIpUOkGP/Djky0s/Eg8Ik39Jy7E2S46wfieR09eYU6szQoEGDrB3jxbGNOHcHQ34cpjBlyAWWnp6uUqVKacaMGS5XdkpMTNSRI0c0Z84cl/br1q1T3bp1rT0pkqzqzOl0atOmTapatarLNO6OWEREROjQoUPy9/e3pmWPEDmREzmREzmRU8nJaf369YqNjdXomV+pSvWaZzrJnnByuoJySvpjg4Z0uVvLly9XvXr1imUbkZqaqsDAQKWkpFi/nfNSrEcsvL29Va9ePS1atMgqLLKzs7Vo0SL16dMnV/vo6Gj9+uuvLrFnn31WR48e1RtvvKGIiIhc0/j4+MjHxydX3NPTU56erunnLOxznV3IFCR+7nyLEnc4HG7jefWxsHFyIqe84uREThI55dXHwsbJ6eLl5HA4JElGjtM/0HJ11P183MYdjkLGnZLD3bzziLvJM/94IfqeV5ycroicjBxKT0+3Pu/FsY3Iee2CKPahUP3791diYqJiY2PVoEEDjR07VsePH1f3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NWvWKCYmRgkJCdq/f3+e06Snp6tDhw565JFH3D6/evVqBQcH6+OPP9Zvv/2mZ555RoMHD9bbb799sdIArgjHjx9XTEyMxo0bl+u5EydOaM2aNRo6dKjWrFmjWbNmadOmTbrrrrsKNO8HHnhAnTp1cvtcUlKS7r77brVs2VLr1q3TggULdPDgQd1zzz228gFKuvzWSen0PcTmz5+vjz/+WH/88Yf69u2rPn36aO7cufnO93zfo1lZWWrdurXS09O1fPlyTZ48WZMmTdKwYcOsNklJSWrdurVatGihdevWqW/fvnrwwQe1YMGCoieMy4cBSqAGDRqY3r17W4+zsrJMpUqVzKhRo8477cSJE01AQECBXufRRx81LVq0KGo3gauOJDN79ux826xcudJIMtu3by/QPIcPH25iYmJyxT/99FPj6elpsrKyrNjcuXONw+Ew6enphek2cMVyt07eeOON5vnnn3eJ3XTTTeaZZ54p0Dzz+h6dN2+ecTqdJjk52Yq9++67xt/f36SlpRljjHnyySfNjTfe6DJdp06dTEJCQoFeG5c3jligxElPT9fq1asVHx9vxZxOp+Lj47VixYoL+lopKSkqX778BZ0ncLVLSUmRw+HIcyhFQdWrV09Op1MTJ05UVlaWUlJS9NFHHyk+Pl5eXl4XprPAFahRo0aaO3eudu/eLWOMlixZos2bN+v222+3Nd8VK1aoVq1a1k2OJSkhIUGpqan67bffrDZnf3/ntLnQ398oHhQWKHEOHjyorKwslw2XJIWEhCg5OfmCvc7y5cs1ffp0PfTQQxdsnsDV7tSpU3rqqafUpUsX+fv725pXlSpV9PXXX2vIkCHy8fFRYGCgdu3apU8++eQC9Ra4Mr311luqUaOGwsPD5e3trTvuuEPjxo1T06ZNbc03OTnZ7XdzznP5tUlNTdXJkydtvT6KH4UFrji9evVSmTJlrL+i2LBhg+6++24NHz7c9h4cAKdlZGSoY8eOMsbo3XffteJ33nmntb7eeOONBZ5fcnKyevbsqcTERP38889atmyZvL291b59exljLkYKwBXhrbfe0o8//qi5c+dq9erVGjNmjHr37q1vvvlG0oX5HsXVybO4OwAUVsWKFeXh4aF9+/a5xPft26fQ0FA9//zzGjhwYJHn//vvv+vWW2/VQw89pGeffdZudwHoTFGxfft2LV682OVoxfvvv2/tqSzMEKZx48YpICBAr7zyihX7+OOPFRERoZ9++kk333zzhUsAuEKcPHlSQ4YM0ezZs9W6dWtJUu3atbVu3TqNHj1a8fHxRf4eDQ0NzXWFxpzv6tDQUOv/7r6//f395efnV5SUcBmhsECJ4+3trXr16mnRokVq166dJCk7O1uLFi1Snz59FBwcrODg4CLN+7ffflPLli2VmJiokSNHXsBeA1evnKLizz//1JIlS1ShQgWX58PCwoo03xMnTsjpdD3w7uHhIen0NgFAbhkZGcrIyHC77uSsN0X9Ho2Li9PIkSO1f/9+a/qFCxfK399fNWrUsNrMmzfPZbqFCxcqLi6uKOngMkNhgRKpf//+SkxMVGxsrBo0aKCxY8fq+PHj6t69e57T7NixQ4cPH9aOHTuUlZWldevWSZKqVaumMmXKaMOGDWrZsqUSEhLUv39/azyoh4eHgoKCLkVaQIl07NgxbdmyxXqclJSkdevWqXz58rrmmmvUvn17rVmzRl988YWysrKsdat8+fLy9vbOc75btmzRsWPHlJycrJMnT1rrbI0aNeTt7a3WrVvr9ddf1/PPP68uXbro6NGjGjJkiCpXrqy6dete1JyBy1l+6+S1116rZs2aadCgQfLz81PlypW1bNkyffjhh3rttdfyne/5vkdvv/121ahRQ/fff79eeeUVJScn69lnn1Xv3r3l4+Mj6fQwq7fffltPPvmkHnjgAS1evFiffPKJvvzyy4u2PHAJFfNVqYAie+utt8y1115rvL29TYMGDcyPP/6Yb/vExEQjKdffkiVLjDGnL2np7vnKlStf/GSAEmzJkiVu153ExESTlJTk9rmz1728NGvWzO10SUlJVpv//e9/pm7duqZ06dImKCjI3HXXXeaPP/64uAkDl7n81kljjNm7d6/p1q2bqVSpkvH19TU33HCDGTNmjMnOzs53vuf7HjXGmG3btpk777zT+Pn5mYoVK5oBAwaYjIyMXP2rU6eO8fb2NlFRUWbixIkXeAmguDiM4Qw3AAAAAPZwVSgAAAAAtlFYAAAAALCNwgIAAACAbRQWAAAAAGyjsAAAAABgG4UFAAAAANsoLAAAAADYRmEBAAAAwDYKCwAAAAC2UVgAAAAAsI3CAgAAAIBtFBYAAAAAbPs/3hiKnImrInMAAAAASUVORK5CYII="/>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0296ea32">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Age-band–specific proportions of anti-GABABR AIE patients estimated using a generalized gamma distribution</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3d956302">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Practical-Guidance">Practical Guidance<a class="anchor-link" href="#Practical-Guidance">¶</a></h2><p>This notebook provides a reusable template. When adapting to other diseases, ensure clinical plausibility of candidate distributions and interpret tail behavior carefully.</p>
 </div>
 </div>
 </div>
