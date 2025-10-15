@@ -14,7 +14,7 @@ Because **individual patient data (IPD)** are rarely available, the workflow foc
 - Optimizes parameters to better handle **“fat tails”** (e.g., rare late-onset cases).
 - Helps make study results **more comparable and usable** for downstream modeling.
 
----
+
 
 ## **📁 Repository Overview**
 
@@ -30,12 +30,12 @@ This repo contains three main Jupyter notebooks:
     
     Explore how different assumptions and input ranges affect the reconstructed distributions.
     
-3. **03_fat_tail_optimization.ipynb**
+<!--3. **03_fat_tail_optimization.ipynb**
     
-    Fine-tune distribution parameters to better capture long tails in the data.
+    Fine-tune distribution parameters to better capture long tails in the data.-->
     
 
----
+
 
 ## **🛠️ Tools and Libraries**
 
@@ -47,13 +47,13 @@ This project uses common Python packages:
 - matplotlib / seaborn
 - jupyter
 
-Install everything with:
+<!--Install everything with:
 
 ```
 pip install -r requirements.txt
-```
+```-->
 
----
+
 
 ## **🚀 How to Run**
 
@@ -64,26 +64,22 @@ git clone https://github.com/<your-username>/<repo-name>.git
 cd <repo-name>
 ```
 
-1. 
 2. **Start Jupyter Lab or Notebook**:
 
 ```
 jupyter lab
 ```
-
-1. or
+or
 
 ```
 jupyter notebook
 ```
 
-1. 
 2. **Run the notebooks in order**:
     - 01_construct_distribution.ipynb
     - 02_sensitivity_analysis.ipynb
-    - 03_fat_tail_optimization.ipynb
+    <!--- 03_fat_tail_optimization.ipynb-->
 
----
 
 ## **📌 Tips & Notes**
 
@@ -92,13 +88,11 @@ jupyter notebook
 - Visual outputs are included to **check the shape and fit** of reconstructed distributions.
 - Sensitivity analyses help you understand the **range of plausible distributions**.
 
----
 
-## **📜 License**
+<!--## **📜 License**
 
-This project is released under the [MIT License](https://www.notion.so/LICENSE).
+This project is released under the [MIT License](https://www.notion.so/LICENSE).-->
 
----
 
 ## **🤝 Acknowledgment**
 
