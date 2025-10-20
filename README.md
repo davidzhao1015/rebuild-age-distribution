@@ -49,7 +49,7 @@ This project uses common Python packages:
 pip install -r requirements.txt
 ```-->
 
-## How to Run
+<!--## How to Run
 
 1. **Clone this repository**:
 
@@ -72,7 +72,7 @@ jupyter notebook
 2. **Run the notebooks in order**:
     - 01_construct_distribution.ipynb
     - 02_sensitivity_analysis.ipynb
-    <!--- 03_fat_tail_optimization.ipynb-->
+    <!--- 03_fat_tail_optimization.ipynb-->-->
 
 ## Tips & Notes
 
