@@ -54,7 +54,7 @@ pip install -r requirements.txt
 1. **Clone this repository**:
 
 ```
-git clone https://github.com/<your-username>/<repo-name>.git
+git clone https://github.com/davidzhao1015/rebuild-age-distribution.git
 cd <repo-name>
 ```
 
